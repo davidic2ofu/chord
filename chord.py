@@ -9,16 +9,21 @@ except:
 def redraw(func):
 	def wrapper(*args, **kwargs):
 		plt.close()
+		if G.has_edge(list(G.nodes)[0], list(G.nodes)[-1]):
+			G.remove_edge(list(G.nodes)[0], list(G.nodes)[-1])
 		func(*args, **kwargs)
-		nx.draw_shell(G, with_labels=True)
+		G.add_edge(list(G.nodes)[0], list(G.nodes)[-1])
+		pos = nx.circular_layout(G)
+		color_map = ['blue' if x % 2 == 0 else 'red' for x in list(G.nodes)]
+		size_map = [300 if x % 2 == 0 else 600 for x in list(G.nodes)]
+		nx.draw(G, pos, node_color=color_map, node_size=size_map, with_labels=True)
 	return wrapper
 
 
+@redraw
 def prepare_graph(G):
 	G.add_node(1)
 	plt.ion()
-	plt.show()
-	nx.draw_shell(G, with_labels=True)
 
 
 @redraw
@@ -46,7 +51,8 @@ instructions = '''
 
 
 if __name__ == '__main__':
-	G = nx.Graph()
+	m = 5
+	G = nx.path_graph(2 ** m)
 	prepare_graph(G)
 	print title
 	while True:
