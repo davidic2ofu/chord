@@ -124,6 +124,9 @@ def lookup(G, node):
 				if key in finger_table[i][0]:
 					finger_range = '[{}...{}]'.format(finger_table[i][0][0], finger_table[i][0][-1])
 					print '\nChecking finger table at node {}...\nFinger values {} at node {} point to node {}'.format(node, finger_range, node, finger_table[i][1])
+					if finger_table[i][0][0] - finger_table[i][0][-1] > 0 and key <= finger_table[i][1] + len(G.nodes):
+						print '\nLOOKUP SUCCESSFUL!\nData found at node {}: {}'.format(finger_table[i][1], G.node[finger_table[i][1]]['value'])
+						return
 					if key <= finger_table[i][1]:
 						print '\nLOOKUP SUCCESSFUL!\nData found at node {}: {}'.format(finger_table[i][1], G.node[finger_table[i][1]]['value'])
 						return
