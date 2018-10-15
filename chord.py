@@ -89,7 +89,9 @@ def create_finger_table(G, k):
 	m = int(math.log(len(list(G.nodes)), 2))
 	for i in range(m):
 		f = (k + 2 ** i) % len(list(G.nodes))
-		finger_table[i] = get_finger_value(f)
+		g = (k + 2 ** (i + 1))
+		finger_range = [j % len(list(G.nodes)) for j in range(f, g)]
+		finger_table[i] = (finger_range, get_finger_value(f))
 	return finger_table
 
 
@@ -106,10 +108,34 @@ def print_node_info(G, key):
 	print '{}\'s successor: {}'.format(key, G.node[key]['succ'])
 	print '{}\'s predecessor: {}'.format(key, G.node[key]['pred'])
 	print '{}\'s finger table:'.format(key)
-	print 'index    finger'
+	print '\nindex    finger range    finger value'
 	m = int(math.log(len(list(G.nodes)), 2))
 	for i in range(m):
-		print '{: <3}      {}'.format(i, G.node[key]['finger_table'][i])
+		finger_range = '[{}...{}]'.format(G.node[key]['finger_table'][i][0][0], G.node[key]['finger_table'][i][0][-1])
+		print '{: <9}{: <16}{}'.format(i, finger_range, G.node[key]['finger_table'][i][1])
+
+
+def lookup(G, node):
+	key = int(raw_input('Enter key id to lookup from node {}: '.format(node)))
+	if key in range(len(list(G.nodes))):
+		while True:
+			finger_table = G.node[node]['finger_table']
+			for i in range(len(finger_table)):
+				if key in finger_table[i][0]:
+					finger_range = '[{}...{}]'.format(finger_table[i][0][0], finger_table[i][0][-1])
+					print '\nChecking finger table at node {}...\nFinger values {} at node {} point to node {}'.format(node, finger_range, node, finger_table[i][1])
+					if key <= finger_table[i][1]:
+						print '\nLOOKUP SUCCESSFUL!\nData found at node {}: {}'.format(finger_table[i][1], G.node[finger_table[i][1]]['value'])
+						return
+					node = finger_table[i][1]
+					break
+
+
+		# succ = get_succ(G, key)
+		# print '{} is {}\'s successor!'.format(succ, key)
+		print 'Data stored in node {}: {}'.format(succ, G.node[succ]['value'])
+	else:
+		print '{} is not a valid key.'.format(key)
 
 
 def is_valid_node(G, k):
@@ -124,16 +150,16 @@ instructions = '''
  User choices:
   1. Add node
   2. Delete node
-  3. Lookup data by key
+  3. Lookup data
   4. View node configuration (succ, pred, finger table)
   5. Exit
 '''
 
 
 if __name__ == '__main__':
-	G = nx.cycle_graph(2 ** 5)
-	prepare_graph(G)
 	print title
+	G = nx.cycle_graph(2 ** 6)
+	prepare_graph(G)
 	while True:
 		print instructions
 		choice = raw_input('Enter your choice: ')
@@ -143,13 +169,11 @@ if __name__ == '__main__':
 			key = int(raw_input('Which node id to delete: '))
 			delete(G, key)
 		if choice == '3':
-			key = int(raw_input('Enter key id to lookup: '))
-			if key in range(len(list(G.nodes))):
-				succ = get_succ(G, key)
-				print '{} is {}\'s successor!'.format(succ, key)
-				print 'Data stored in node {}: {}'.format(succ, G.node[succ]['value'])
+			node = int(raw_input('Enter node id to lookup from: '))
+			if is_valid_node(G, node):
+				lookup(G, node)
 			else:
-				print '{} is not a valid key.'.format(key)
+				print '{} is not a valid node.'.format(node)
 		if choice == '4':
 			key = int(raw_input('Enter node id to analyze: '))
 			print_node_info(G, key)
