@@ -115,28 +115,24 @@ def print_node_info(G, key):
 		print '{: <9}{: <16}{}'.format(i, finger_range, G.node[key]['finger_table'][i][1])
 
 
+@check_valid
 def lookup(G, node):
+	def find_successor(node, id):
+		succ = G.node[node]['succ']
+		g = succ if succ > node else succ + len(G.nodes)
+		check_range = [j % len(list(G.nodes)) for j in range(node, g + 1)]
+		print '\nChecking table at node {}...'.format(node)
+		if id in check_range:
+			result = G.node[node]['succ']
+			print '\nLOOKUP SUCCESSFUL!\nData found at node {}: {}'.format(result, G.node[result]['value'])
+			return result
+		else:
+			n_prime = get_pred(G, id)
+			print '\nTable at node {} points to node {}'.format(node, n_prime)
+			return find_successor(n_prime, id)
 	key = int(raw_input('Enter key id to lookup from node {}: '.format(node)))
 	if key in range(len(list(G.nodes))):
-		while True:
-			finger_table = G.node[node]['finger_table']
-			for i in range(len(finger_table)):
-				if key in finger_table[i][0]:
-					finger_range = '[{}...{}]'.format(finger_table[i][0][0], finger_table[i][0][-1])
-					print '\nChecking finger table at node {}...\nFinger values {} at node {} point to node {}'.format(node, finger_range, node, finger_table[i][1])
-					if finger_table[i][0][0] - finger_table[i][0][-1] > 0 and key <= finger_table[i][1] + len(G.nodes):
-						print '\nLOOKUP SUCCESSFUL!\nData found at node {}: {}'.format(finger_table[i][1], G.node[finger_table[i][1]]['value'])
-						return
-					if key <= finger_table[i][1]:
-						print '\nLOOKUP SUCCESSFUL!\nData found at node {}: {}'.format(finger_table[i][1], G.node[finger_table[i][1]]['value'])
-						return
-					node = finger_table[i][1]
-					break
-
-
-		# succ = get_succ(G, key)
-		# print '{} is {}\'s successor!'.format(succ, key)
-		print 'Data stored in node {}: {}'.format(succ, G.node[succ]['value'])
+		succ = find_successor(node, key)
 	else:
 		print '{} is not a valid key.'.format(key)
 
@@ -173,14 +169,10 @@ if __name__ == '__main__':
 			delete(G, key)
 		if choice == '3':
 			node = int(raw_input('Enter node id to lookup from: '))
-			if is_valid_node(G, node):
-				lookup(G, node)
-			else:
-				print '{} is not a valid node.'.format(node)
+			lookup(G, node)
 		if choice == '4':
 			key = int(raw_input('Enter node id to analyze: '))
 			print_node_info(G, key)
-
-
 		if choice == '5':
+			print '\nHave a nice day!\n'
 			exit()

@@ -21,7 +21,7 @@ The software should work for all cases:
    - notifies successor and predecessor
 3. Lookup of data (** my intention is to qualify for the 20 pt bonus **)
    - takes node id and lookup id from user
-   - uses finger table entries as it progresses through ring to locate the data id
+   - uses table entries as it progresses through Chord to locate the data id
    - returns information about hops along the path as well as the data once it is found
 4. Node configuration information can be viewed
    - successor id
